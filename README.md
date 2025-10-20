@@ -17,3 +17,17 @@ Sistema integral de gestión para gimnasios que automatiza control de accesos, c
 ```bash
 git clone https://github.com/tu-usuario/gimnasio_sistema.git
 cd gimnasio_sistema
+```
+
+2. **Crear entorno virtual e instalar dependencias**:
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -U pip
+pip install -e .
+```
+
+3. **Ejecutar la aplicación**:
+```bash
+python -m gimnasio.app
+```
