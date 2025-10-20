@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gimnasio-sistema"
+version = "0.1.0"
+description = "Aplicación de escritorio para la gestión integral de gimnasios"
+authors = [{name = "Gimnasio Devs"}]
+requires-python = ">=3.9"
+dependencies = [
+    "pillow>=9.5.0",
+    "matplotlib>=3.7.0",
+    "pandas>=2.0.0",
+    "openpyxl>=3.1.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
