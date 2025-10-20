@@ -6,9 +6,9 @@
         "horario": "Lunes a Viernes: 5:00 AM - 10:00 PM\nSábados: 6:00 AM - 8:00 PM\nDomingos: 7:00 AM - 6:00 PM"
     },
     "precios": {
-        "mensual": 50.0,
-        "trimestral": 135.0,
-        "semestral": 240.0,
+        "mensual": 10.0,
+        "trimestral": 120.0,
+        "semestral": 210.0,
         "anual": 450.0
     },
     "backup": {

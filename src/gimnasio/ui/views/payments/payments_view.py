@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox
 
 from gimnasio.services.clients_service import ClientsService
 from gimnasio.services.payments_service import PaymentsService
+from gimnasio.services.settings_service import SettingsService
 from gimnasio.utils import formatters
 from gimnasio.utils.validators import ValidationError
 
@@ -13,13 +14,17 @@ class PaymentsView(ttk.Frame):
         parent,
         payments_service: PaymentsService,
         clients_service: ClientsService,
+        settings_service: SettingsService,
         **_extra_kwargs,
     ):
         super().__init__(parent)
         self.pack(fill=tk.BOTH, expand=True)
         self.payments_service = payments_service
         self.clients_service = clients_service
+        self.settings_service = settings_service
         self.cliente_actual = None
+        self.config = self.settings_service.load()
+        self.planes = self.config.get("precios", {})
         self._build_ui()
 
     def _build_ui(self):
@@ -53,34 +58,72 @@ class PaymentsView(ttk.Frame):
         self.membresia_label.pack(fill=tk.X, padx=10, pady=(0, 10))
 
         formulario = ttk.LabelFrame(tab, text="💰 Registrar Nuevo Pago")
-        formulario.pack(fill=tk.X, pady=10)
+        formulario.pack(fill=tk.X, pady=10, padx=10)
 
-        ttk.Label(formulario, text="Monto ($):").grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
-        self.monto_var = tk.StringVar()
-        self.monto_entry = ttk.Entry(formulario, textvariable=self.monto_var, width=15)
-        self.monto_entry.grid(row=0, column=1, padx=5, pady=5, sticky=tk.W)
+        # Selección de plan
+        ttk.Label(formulario, text="Seleccione un Plan:", font=("Arial", 10, "bold")).grid(
+            row=0, column=0, columnspan=2, padx=5, pady=(10, 5), sticky=tk.W
+        )
 
-        ttk.Label(formulario, text="Duración:").grid(row=1, column=0, padx=5, pady=5, sticky=tk.W)
-        self.duracion_var = tk.StringVar(value="1")
-        duracion_frame = ttk.Frame(formulario)
-        duracion_frame.grid(row=1, column=1, padx=5, pady=5, sticky=tk.W)
-        for text, value in [("1 Mes", "1"), ("3 Meses", "3"), ("6 Meses", "6"), ("1 Año", "12")]:
-            ttk.Radiobutton(duracion_frame, text=text, variable=self.duracion_var, value=value).pack(
-                side=tk.LEFT, padx=5
-            )
+        self.plan_var = tk.StringVar()
+        planes_frame = ttk.Frame(formulario)
+        planes_frame.grid(row=1, column=0, columnspan=2, padx=5, pady=5, sticky=tk.W)
 
-        ttk.Label(formulario, text="Método de pago:").grid(row=2, column=0, padx=5, pady=5, sticky=tk.W)
+        # Mapeo de planes a meses
+        self.plan_meses = {
+            "mensual": 1,
+            "trimestral": 3,
+            "semestral": 6,
+            "anual": 12
+        }
+
+        # Crear radio buttons para cada plan
+        plan_labels = {
+            "mensual": "📅 Mensual",
+            "trimestral": "📅 Trimestral (3 meses)",
+            "semestral": "📅 Semestral (6 meses)",
+            "anual": "📅 Anual (12 meses)"
+        }
+
+        row_num = 0
+        col_num = 0
+        for plan_key, plan_label in plan_labels.items():
+            if plan_key in self.planes:
+                precio = self.planes[plan_key]
+                texto = f"{plan_label} - {formatters.format_currency(precio)}"
+                rb = ttk.Radiobutton(
+                    planes_frame,
+                    text=texto,
+                    variable=self.plan_var,
+                    value=plan_key
+                )
+                rb.grid(row=row_num, column=col_num, padx=10, pady=5, sticky=tk.W)
+                col_num += 1
+                if col_num > 1:  # 2 columnas
+                    col_num = 0
+                    row_num += 1
+
+        # Seleccionar el plan mensual por defecto
+        if "mensual" in self.planes:
+            self.plan_var.set("mensual")
+
+        ttk.Label(formulario, text="Método de pago:", font=("Arial", 10, "bold")).grid(
+            row=2, column=0, padx=5, pady=(15, 5), sticky=tk.W
+        )
         self.metodo_var = tk.StringVar(value="Efectivo")
-        ttk.Combobox(
-            formulario,
-            textvariable=self.metodo_var,
-            values=["Efectivo", "Transferencia", "Tarjeta"],
-            state="readonly",
-            width=18,
-        ).grid(row=2, column=1, padx=5, pady=5, sticky=tk.W)
+        metodo_frame = ttk.Frame(formulario)
+        metodo_frame.grid(row=3, column=0, columnspan=2, padx=5, pady=5, sticky=tk.W)
+        
+        for metodo in ["💵 Efectivo", "💳 Tarjeta", "🏦 Transferencia"]:
+            ttk.Radiobutton(
+                metodo_frame,
+                text=metodo,
+                variable=self.metodo_var,
+                value=metodo.split(" ", 1)[1]  # Quitar el emoji
+            ).pack(side=tk.LEFT, padx=10)
 
         botones = ttk.Frame(formulario)
-        botones.grid(row=3, column=0, columnspan=2, pady=10)
+        botones.grid(row=4, column=0, columnspan=2, pady=15)
         ttk.Button(botones, text="💾 Registrar Pago", style="Success.TButton", command=self._registrar_pago).pack(
             side=tk.LEFT, padx=5
         )
@@ -204,23 +247,35 @@ class PaymentsView(ttk.Frame):
         if not self.cliente_actual:
             messagebox.showwarning("Advertencia", "Busque un cliente antes de registrar un pago")
             return
+        
+        plan_seleccionado = self.plan_var.get()
+        if not plan_seleccionado:
+            messagebox.showwarning("Advertencia", "Seleccione un plan")
+            return
+            
         try:
-            monto = float(self.monto_var.get())
-            duracion = int(self.duracion_var.get())
+            # Obtener monto y duración del plan seleccionado
+            monto = self.planes.get(plan_seleccionado, 0)
+            duracion = self.plan_meses.get(plan_seleccionado, 1)
             metodo = self.metodo_var.get()
+            
+            if monto <= 0:
+                messagebox.showerror("Error", f"El plan '{plan_seleccionado}' no tiene un precio válido")
+                return
+            
             pago = self.payments_service.registrar_pago(self.cliente_actual.cedula, monto, duracion, metodo)
             messagebox.showinfo(
                 "Éxito",
-                f"Pago registrado correctamente.\n"
-                f"Vence el {pago.fecha_vencimiento}\n"
-                f"Monto: {formatters.format_currency(pago.monto)}",
+                f"✅ Pago registrado correctamente\n\n"
+                f"📋 Plan: {plan_seleccionado.capitalize()}\n"
+                f"💰 Monto: {formatters.format_currency(pago.monto)}\n"
+                f"📅 Duración: {pago.duracion_meses} mes(es)\n"
+                f"⏰ Vence el: {pago.fecha_vencimiento}",
             )
             self._mostrar_membresia(self.cliente_actual.cedula)
             self._cargar_historial_todos()
             self._cargar_vencidos()
             self._limpiar_formulario()
-        except ValueError:
-            messagebox.showerror("Error", "Monto o duración inválidos")
         except ValidationError as exc:
             messagebox.showerror("Error", str(exc))
         except Exception as exc:
@@ -233,8 +288,8 @@ class PaymentsView(ttk.Frame):
 
     def _limpiar_formulario(self):
         self.cedula_var.set("")
-        self.monto_var.set("")
-        self.duracion_var.set("1")
+        if "mensual" in self.planes:
+            self.plan_var.set("mensual")
         self.metodo_var.set("Efectivo")
         self._limpiar_info()
         self.cedula_entry.focus()
