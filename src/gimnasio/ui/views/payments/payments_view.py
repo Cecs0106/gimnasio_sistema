@@ -28,7 +28,8 @@ class PaymentsView(ttk.Frame):
         self._build_ui()
 
     def _build_ui(self):
-        ttk.Label(self, text="💰 SISTEMA DE PAGOS", font=("Arial", 16, "bold")).pack(pady=10)
+        ttk.Label(self, text="💰 SISTEMA DE PAGOS",
+                  font=("Arial", 16, "bold")).pack(pady=10)
 
         self.notebook = ttk.Notebook(self)
         self.notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
@@ -44,17 +45,22 @@ class PaymentsView(ttk.Frame):
         buscador = ttk.LabelFrame(tab, text="🔍 Buscar Cliente")
         buscador.pack(fill=tk.X, pady=10)
 
-        ttk.Label(buscador, text="Cédula:").grid(row=0, column=0, padx=5, pady=5)
+        ttk.Label(buscador, text="Cédula:").grid(
+            row=0, column=0, padx=5, pady=5)
         self.cedula_var = tk.StringVar()
-        self.cedula_entry = ttk.Entry(buscador, textvariable=self.cedula_var, width=20)
+        self.cedula_entry = ttk.Entry(
+            buscador, textvariable=self.cedula_var, width=20)
         self.cedula_entry.grid(row=0, column=1, padx=5, pady=5)
         self.cedula_entry.bind("<Return>", self._buscar_cliente)
-        ttk.Button(buscador, text="Buscar", command=self._buscar_cliente).grid(row=0, column=2, padx=5, pady=5)
+        ttk.Button(buscador, text="Buscar", command=self._buscar_cliente).grid(
+            row=0, column=2, padx=5, pady=5)
 
-        self.info_cliente_label = ttk.Label(tab, text="Ingrese una cédula para buscar", font=("Arial", 10))
+        self.info_cliente_label = ttk.Label(
+            tab, text="Ingrese una cédula para buscar", font=("Arial", 10))
         self.info_cliente_label.pack(fill=tk.X, padx=10, pady=10)
 
-        self.membresia_label = ttk.Label(tab, text="No hay información de membresía", font=("Arial", 9))
+        self.membresia_label = ttk.Label(
+            tab, text="No hay información de membresía", font=("Arial", 9))
         self.membresia_label.pack(fill=tk.X, padx=10, pady=(0, 10))
 
         formulario = ttk.LabelFrame(tab, text="💰 Registrar Nuevo Pago")
@@ -67,7 +73,8 @@ class PaymentsView(ttk.Frame):
 
         self.plan_var = tk.StringVar()
         planes_frame = ttk.Frame(formulario)
-        planes_frame.grid(row=1, column=0, columnspan=2, padx=5, pady=5, sticky=tk.W)
+        planes_frame.grid(row=1, column=0, columnspan=2,
+                          padx=5, pady=5, sticky=tk.W)
 
         # Mapeo de planes a meses
         self.plan_meses = {
@@ -97,7 +104,8 @@ class PaymentsView(ttk.Frame):
                     variable=self.plan_var,
                     value=plan_key
                 )
-                rb.grid(row=row_num, column=col_num, padx=10, pady=5, sticky=tk.W)
+                rb.grid(row=row_num, column=col_num,
+                        padx=10, pady=5, sticky=tk.W)
                 col_num += 1
                 if col_num > 1:  # 2 columnas
                     col_num = 0
@@ -112,8 +120,9 @@ class PaymentsView(ttk.Frame):
         )
         self.metodo_var = tk.StringVar(value="Efectivo")
         metodo_frame = ttk.Frame(formulario)
-        metodo_frame.grid(row=3, column=0, columnspan=2, padx=5, pady=5, sticky=tk.W)
-        
+        metodo_frame.grid(row=3, column=0, columnspan=2,
+                          padx=5, pady=5, sticky=tk.W)
+
         for metodo in ["💵 Efectivo", "💳 Tarjeta", "🏦 Transferencia"]:
             ttk.Radiobutton(
                 metodo_frame,
@@ -127,7 +136,8 @@ class PaymentsView(ttk.Frame):
         ttk.Button(botones, text="💾 Registrar Pago", style="Success.TButton", command=self._registrar_pago).pack(
             side=tk.LEFT, padx=5
         )
-        ttk.Button(botones, text="🗑️ Limpiar", command=self._limpiar_formulario).pack(side=tk.LEFT, padx=5)
+        ttk.Button(botones, text="🗑️ Limpiar",
+                   command=self._limpiar_formulario).pack(side=tk.LEFT, padx=5)
 
     def _build_history_tab(self):
         tab = ttk.Frame(self.notebook)
@@ -138,18 +148,22 @@ class PaymentsView(ttk.Frame):
 
         ttk.Label(filtros, text="Cédula:").pack(side=tk.LEFT, padx=5)
         self.hist_cedula_var = tk.StringVar()
-        entrada = ttk.Entry(filtros, textvariable=self.hist_cedula_var, width=20)
+        entrada = ttk.Entry(
+            filtros, textvariable=self.hist_cedula_var, width=20)
         entrada.pack(side=tk.LEFT, padx=5)
         entrada.bind("<Return>", self._cargar_historial)
-        ttk.Button(filtros, text="Buscar", command=self._cargar_historial).pack(side=tk.LEFT, padx=5)
-        ttk.Button(filtros, text="Todos", command=self._cargar_historial_todos).pack(side=tk.LEFT, padx=5)
+        ttk.Button(filtros, text="Buscar", command=self._cargar_historial).pack(
+            side=tk.LEFT, padx=5)
+        ttk.Button(filtros, text="Todos", command=self._cargar_historial_todos).pack(
+            side=tk.LEFT, padx=5)
 
         contenedor = ttk.Frame(tab)
         contenedor.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
         self.hist_tree = ttk.Treeview(
             contenedor,
-            columns=("id", "cedula", "cliente", "monto", "duracion", "fecha_pago", "fecha_vencimiento", "metodo", "estado"),
+            columns=("id", "cedula", "cliente", "monto", "duracion",
+                     "fecha_pago", "fecha_vencimiento", "metodo", "estado"),
             show="headings",
             height=15,
         )
@@ -167,7 +181,8 @@ class PaymentsView(ttk.Frame):
             self.hist_tree.heading(col, text=heading)
             self.hist_tree.column(col, width=width)
 
-        scrollbar = ttk.Scrollbar(contenedor, orient=tk.VERTICAL, command=self.hist_tree.yview)
+        scrollbar = ttk.Scrollbar(
+            contenedor, orient=tk.VERTICAL, command=self.hist_tree.yview)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.hist_tree.configure(yscrollcommand=scrollbar.set)
         self.hist_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
@@ -183,7 +198,8 @@ class PaymentsView(ttk.Frame):
 
         self.vencidos_tree = ttk.Treeview(
             contenedor,
-            columns=("cedula", "cliente", "telefono", "fecha_vencimiento", "dias_vencido"),
+            columns=("cedula", "cliente", "telefono",
+                     "fecha_vencimiento", "dias_vencido"),
             show="headings",
             height=15,
         )
@@ -197,12 +213,14 @@ class PaymentsView(ttk.Frame):
             self.vencidos_tree.heading(col, text=heading)
             self.vencidos_tree.column(col, width=width)
 
-        scrollbar = ttk.Scrollbar(contenedor, orient=tk.VERTICAL, command=self.vencidos_tree.yview)
+        scrollbar = ttk.Scrollbar(
+            contenedor, orient=tk.VERTICAL, command=self.vencidos_tree.yview)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.vencidos_tree.configure(yscrollcommand=scrollbar.set)
         self.vencidos_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        ttk.Button(tab, text="🔄 Actualizar", command=self._cargar_vencidos).pack(pady=5)
+        ttk.Button(tab, text="🔄 Actualizar",
+                   command=self._cargar_vencidos).pack(pady=5)
         self._cargar_vencidos()
 
     # --- Funcionalidad ---
@@ -225,7 +243,8 @@ class PaymentsView(ttk.Frame):
     def _mostrar_membresia(self, cedula: str):
         pago = self.payments_service.pago_activo(cedula)
         if not pago:
-            self.membresia_label.config(text="❌ No tiene membresía activa", foreground="orange")
+            self.membresia_label.config(
+                text="❌ No tiene membresía activa", foreground="orange")
             return
         dias_restantes = pago.vence_en()
         if dias_restantes >= 0:
@@ -245,25 +264,28 @@ class PaymentsView(ttk.Frame):
 
     def _registrar_pago(self):
         if not self.cliente_actual:
-            messagebox.showwarning("Advertencia", "Busque un cliente antes de registrar un pago")
+            messagebox.showwarning(
+                "Advertencia", "Busque un cliente antes de registrar un pago")
             return
-        
+
         plan_seleccionado = self.plan_var.get()
         if not plan_seleccionado:
             messagebox.showwarning("Advertencia", "Seleccione un plan")
             return
-            
+
         try:
             # Obtener monto y duración del plan seleccionado
             monto = self.planes.get(plan_seleccionado, 0)
             duracion = self.plan_meses.get(plan_seleccionado, 1)
             metodo = self.metodo_var.get()
-            
+
             if monto <= 0:
-                messagebox.showerror("Error", f"El plan '{plan_seleccionado}' no tiene un precio válido")
+                messagebox.showerror(
+                    "Error", f"El plan '{plan_seleccionado}' no tiene un precio válido")
                 return
-            
-            pago = self.payments_service.registrar_pago(self.cliente_actual.cedula, monto, duracion, metodo)
+
+            pago = self.payments_service.registrar_pago(
+                self.cliente_actual.cedula, monto, duracion, metodo)
             messagebox.showinfo(
                 "Éxito",
                 f"✅ Pago registrado correctamente\n\n"
@@ -279,12 +301,14 @@ class PaymentsView(ttk.Frame):
         except ValidationError as exc:
             messagebox.showerror("Error", str(exc))
         except Exception as exc:
-            messagebox.showerror("Error", f"No se pudo registrar el pago: {exc}")
+            messagebox.showerror(
+                "Error", f"No se pudo registrar el pago: {exc}")
 
     def _limpiar_info(self):
         self.cliente_actual = None
         self.info_cliente_label.config(text="Ingrese una cédula para buscar")
-        self.membresia_label.config(text="No hay información de membresía", foreground="black")
+        self.membresia_label.config(
+            text="No hay información de membresía", foreground="black")
 
     def _limpiar_formulario(self):
         self.cedula_var.set("")
